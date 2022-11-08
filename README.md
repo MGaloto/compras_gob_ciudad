@@ -11,6 +11,10 @@
 - [**Metodologia**](https://github.com/MGaloto/compras_gcb#metodologia)
 - [**Resultados**](https://github.com/MGaloto/compras_gcb#resultados)
 
+### Dashoard Final:
+
+- [Dashboard](https://maxi-galo.shinyapps.io/buenosairescompras) ✅
+
 
 ## Introduccion
 
