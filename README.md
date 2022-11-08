@@ -59,6 +59,8 @@ Levantando la arquitectura:
 docker-compose up -d
 ```
 
+Una vez ejecutado el DAG los archivos de salida se guardan dentro de la carpeta home.
+
 
 ## Librerias
 
