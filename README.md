@@ -6,11 +6,11 @@
 ### Contenido:
 
 
-- [**Introduccion**](https://github.com/MGaloto/compras_gcb#introduccion)
-- [**Docker**](https://github.com/MGaloto/compras_gcb#docker)
-- [**Librerias**](https://github.com/MGaloto/compras_gcb#librerias)
-- [**Metodologia**](https://github.com/MGaloto/compras_gcb#metodologia)
-- [**Resultados**](https://github.com/MGaloto/compras_gcb#resultados)
+- [**Introduccion**](https://github.com/MGaloto/compras_gob_ciudad#introduccion)
+- [**Docker**](https://github.com/MGaloto/compras_gob_ciudad#docker)
+- [**Librerias**](https://github.com/MGaloto/compras_gob_ciudad#librerias)
+- [**Metodologia**](https://github.com/MGaloto/compras_gob_ciudad#metodologia)
+- [**Resultados**](https://github.com/MGaloto/compras_gob_ciudad#resultados)
 
 ### Dashoard Final:
 
