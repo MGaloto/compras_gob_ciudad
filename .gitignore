@@ -1,0 +1,12 @@
+links.txt
+bac.Rmd
+bac.html
+env/
+bac_data/
+data/
+.ipynb_checkpoint/
+.Rhistory
+.ipynb_checkpoints
+rsconnect
+df_dolar.csv
+df.csv
