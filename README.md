@@ -7,6 +7,7 @@
 
 
 - [**Introduccion**](https://github.com/MGaloto/compras_gcb#introduccion)
+- [**Docker**](https://github.com/MGaloto/compras_gcb#docker)
 - [**Librerias**](https://github.com/MGaloto/compras_gcb#librerias)
 - [**Metodologia**](https://github.com/MGaloto/compras_gcb#metodologia)
 - [**Resultados**](https://github.com/MGaloto/compras_gcb#resultados)
@@ -36,6 +37,27 @@ Este trabajo consiste en la automatizacion de la extraccion de datos de Buenos A
 - Montos comprometidos por empresas. ✅
 - Montos por tipo de contratación. ✅
 
+
+
+## Docker
+
+
+<div style="text-align: right" class="toc-box">
+ <a href="#top">Volver al Inicio</a>
+</div>
+
+Para correr el ETL se utilizo Airflow con Docker (Imagen apache/airflow:2.3.4). Los siguientes comandos instalan y corren Airflow en modo detach en el puerto 8080:
+
+
+```shell
+docker-compose up airflow-init
+```
+
+Levantando la arquitectura:
+
+```shell
+docker-compose up -d
+```
 
 
 ## Librerias
@@ -73,13 +95,21 @@ Hay que tener en cuenta los siguientes items:
 - Se hizo limpieza del DataFrame inicial y solo se seleccionaron las siguientes columnas:
 
 *tender/procuringEntity/name* (Nombre de la Organización)
+
 *contracts/items/quantity* (El número de unidades requerido)
+
 *contracts/items/unit/value/amount* (Monto como una cifra)
+
 *tender/items/unit/value/currency* (Moneda)
+
 *parties/roles* (Roles de las partes)
+
 *tender/additionalProcurementCategories* (Categorías adicionales de contratación)
+
 *contracts/dateSigned* (Fecha de firma)
+
 *parties/name* (Nombre común)
+
 *tender/procurementMethodDetails* (Detalles del método de contratación)
 
 
