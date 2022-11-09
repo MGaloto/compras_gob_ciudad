@@ -1,7 +1,7 @@
 try:
     from airflow import DAG
     from airflow.operators.python import PythonOperator
-    from datetime import timedelta
+    from datetime import timedelta, datetime
     from airflow.utils.dates import days_ago
     from etl import ETL
 except Exception as e:
@@ -27,8 +27,8 @@ with DAG(
     'retries' : 1, # reintentos si falla
     'retry_delay' : timedelta(minutes=1) # segundos entre reintentos
     },
-    schedule_interval=timedelta(days=1), 
-    start_date=days_ago(2)
+    schedule_interval="@once", 
+    start_date=datetime(2022, 11, 9)
 ) as dag:
 
     extract_task = PythonOperator(task_id='extract', python_callable=extract)
