@@ -44,26 +44,39 @@ class ETL():
             serie = (value.map(lambda x: str(x).replace(",","").strip().title()).values)
             return serie
 
+        def remove_duplicated(data):
+            dataframe = data.loc[:,~data.apply(lambda x: x.duplicated(),axis=1).all()]
+            return dataframe
+
         df = pd.read_csv(f"{CUR_DIR}/data_csv/{CSV_FILE_NAME}.csv", low_memory=False)
         df_dolar = pd.read_csv(f"{CUR_DIR}/data_csv/{DOLAR_FILE_NAME}.csv")[['Fecha','Promedio']].rename(columns = {'Fecha': 'date', 'Promedio': 'tc'})   
 
-        df = df.loc[:,~df.apply(lambda x: x.duplicated(),axis=1).all()]
-        df_dolar = df_dolar.loc[:,~df_dolar.apply(lambda x: x.duplicated(),axis=1).all()]
+        df = remove_duplicated(df)
+        df_dolar = remove_duplicated(df_dolar)
 
         def get_filter_columns(data):
             filter_col = [
-                'tender/procuringEntity/name',
-                'contracts/0/items/0/quantity',
-                'contracts/0/items/0/unit/value/amount',
-                'tender/items/0/unit/value/currency',
-                'parties/0/roles', 
-                'tender/additionalProcurementCategories', 
-                'contracts/0/dateSigned', 
-                'parties/0/name', 
-                'tender/procurementMethodDetails'
+                'tender/procuringEntity/name', # El nombre de la parte involucrada al que se hace referencia. Este debe de ser igual al nombre de una entrada en la sección de participantes. (reparticion)
+                'contracts/0/items/0/quantity', # El número de unidades requerido. (cantidad)
+                'contracts/0/items/0/unit/value/amount', # Monto como una cifra. (precio)
+                'tender/items/0/unit/value/currency', # La moneda para cada monto. (moneda)
+                'parties/0/roles', # Los roles de las partes involucradas en el proceso de contratación. (operador)
+                'tender/additionalProcurementCategories', # Cualquier categoría adicional que describe los objetos de este proceso de contratación. (Rubro)
+                'contracts/0/dateSigned', # La fecha en que se firmó el contrato. En el caso de múltiples firmas, la fecha de la última firma. (date)
+                'parties/0/name', # Un nombre común para esta organización u otro participante en el proceso de contratación. (entidad)
+                'tender/procurementMethodDetails' # Detalles adicionales sobre el método de licitación utilizado. (tipo)
                 ]
                 
-            rename_col = ['reparticion', 'cantidad', 'precio', 'moneda', 'operador', 'rubro', 'date', 'entidad','tipo']
+            rename_col = [
+                'reparticion', 
+                'cantidad', 
+                'precio', 
+                'moneda', 
+                'operador', 
+                'rubro', 
+                'date', 
+                'entidad',
+                'tipo']
             dataframe = data[filter_col]
             dataframe.rename(columns = dict(zip(filter_col, rename_col)), inplace = True)
             return dataframe

@@ -10,6 +10,7 @@
 - [**Docker**](https://github.com/MGaloto/compras_gob_ciudad#docker)
 - [**Librerias**](https://github.com/MGaloto/compras_gob_ciudad#librerias)
 - [**Metodologia**](https://github.com/MGaloto/compras_gob_ciudad#metodologia)
+- [**Estructura**](https://github.com/MGaloto/compras_gob_ciudad#estructura)
 - [**Resultados**](https://github.com/MGaloto/compras_gob_ciudad#resultados)
 
 ### Dashoard Final:
@@ -45,6 +46,11 @@ Este trabajo consiste en la automatizacion de la extraccion de datos de Buenos A
 <div style="text-align: right" class="toc-box">
  <a href="#top">Volver al Inicio</a>
 </div>
+
+### ¿Porque Docker?
+
+Docker es una herramienta de CI/CD que permite la implementación de código sin problemas desde los entornos de desarrollo hasta los de producción. Al crear virtualización a nivel de sistema operativo, puede empaquetar una aplicación y sus dependencias en un contenedor virtual. O, en otras palabras, el código que se desarrolló y probó en el entorno de desarrollo se ejecutará exactamente con el mismo entorno (por ejemplo, el mismo sistema operativo, compiladores, paquetes y otras dependencias) en prod. Docker puede ejecutarse de forma nativa en sistemas Linux y con Docker Desktop (o equivalente) en macOS y Windows OS.
+
 
 Para correr el ETL se utilizo Airflow con Docker (Imagen apache/airflow:2.3.4). Los siguientes comandos instalan y corren Airflow en modo detach en el puerto 8080:
 
@@ -96,23 +102,74 @@ Hay que tener en cuenta los siguientes items:
 
 - Se hizo limpieza del DataFrame inicial y solo se seleccionaron las siguientes columnas:
 
-*tender/procuringEntity/name* (Nombre de la Organización)
+- *tender/procuringEntity/name* (Nombre de la Organización)
 
-*contracts/items/quantity* (El número de unidades requerido)
+- *contracts/items/quantity* (El número de unidades requerido)
 
-*contracts/items/unit/value/amount* (Monto como una cifra)
+- *contracts/items/unit/value/amount* (Monto como una cifra)
 
-*tender/items/unit/value/currency* (Moneda)
+- *tender/items/unit/value/currency* (Moneda)
 
-*parties/roles* (Roles de las partes)
+- *parties/roles* (Roles de las partes)
 
-*tender/additionalProcurementCategories* (Categorías adicionales de contratación)
+- *tender/additionalProcurementCategories* (Categorías adicionales de contratación)
 
-*contracts/dateSigned* (Fecha de firma)
+- *contracts/dateSigned* (Fecha de firma)
 
-*parties/name* (Nombre común)
+- *parties/name* (Nombre común)
 
-*tender/procurementMethodDetails* (Detalles del método de contratación)
+- *tender/procurementMethodDetails* (Detalles del método de contratación)
+
+
+
+
+## Estructura
+
+
+<div style="text-align: right" class="toc-box">
+ <a href="#top">Volver al Inicio</a>
+</div>
+
+
+A continuación se muestra la lista de las carpetas principales del repositorio:
+
+
+``` shell
+.
+│   .gitignore
+│   bac.Rmd
+│   docker-compose.yaml
+│   README.md
+│
+├───dags
+│   │   etl.py
+│   │   my_dag.py
+│   │
+│   ├───data_csv
+│   │       README.md
+│   │
+│   └───home
+│           ejercicio1_all.csv
+│           ejercicio2_all.csv
+│           ejercicio3_all.csv
+│           README.md
+│
+└───images
+        empresas.gif
+        montos.gif
+
+
+```
+
+En resumen:
+
+- El archivo `.gitignore` no trackea docuemntos para el repositorio.
+- `bac.Rmd` es el script de R que contiene el codigo para el dashboard.
+- Con `.docker-compose.yaml` se construye la imagen para ejecutar Airflow.
+- En la carpeta dags se encuentran dos archivos: `etl.py` (Script de Python con el codigo para el ETL) y `my_dag.py` (Script de Python con el codigo para ejecutar con Airflow). 
+- En la carpeta `data_csv` se guardan los archivos de extract.
+- En la carpeta `home` se guardan los archivos del load.
+- En la carpeta `images` estan las imagenes y gifs del repositorio.
 
 
 

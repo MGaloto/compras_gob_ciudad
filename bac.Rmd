@@ -1,0 +1,598 @@
+---
+title: 'Buenos Aires Compras - Año 2022'
+output: 
+  flexdashboard::flex_dashboard:
+    theme : bootstrap
+
+runtime: shiny_prerendered
+
+---
+
+<style>
+
+img {
+  max-width: 69px;
+  max-height: 50px;
+}
+
+.navbar-logo {
+  margin-top: 6px;
+}
+
+.navbar-logo img {
+  margin-right: 34px;
+}
+
+.irs--shiny .irs-bar {
+    top: 25px;
+    height: 7px;
+    border-top: 7px solid #1c47d6;
+    border-bottom: 2px solid #428bca;
+    background: #1d31bd;
+}
+
+.selectize-input {
+  border: 2px solid #21356e;
+  padding: 8px 11px;
+  display: inline-table;
+  width: 87%;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  box-shadow: none;
+  border-radius: 25px;
+}
+
+
+body {
+  background: #ffffff;
+    padding: 50px 0 0 8px;
+  font-family: "Source Sans Pro",Calibri,Candara,Arial,sans-serif;
+  font-size: 14px;
+  line-height: 2;
+  color: #3522c5;
+}
+
+.section.sidebar {
+  position: absolute;
+  top: 80px;
+  left: 9px;
+  right: -15px;
+  bottom: 0;
+  border-right: 10px solid #1e2021;
+  background-color: white;
+  padding-left: 28px;
+  padding-right: 2px;
+  visibility: hidden;
+  overflow: initial;
+}
+
+.irs--shiny.irs-with-grid {
+    height: 61px;
+    width: 162px;
+}
+
+.form-group {
+    margin-bottom: 4px;
+}
+</style>
+
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(readxl)
+library(highcharter)
+library(flexdashboard)
+library(dplyr)
+
+```
+
+
+```{r data, include=FALSE}
+
+
+data_todos = read.csv('data/ejercicio1_all.csv', encoding = 'Latin-1')
+
+data_prov = read.csv('data/ejercicio2_all.csv', encoding = 'Latin-1')
+
+data_cont = read.csv('data/ejercicio3_all.csv', encoding = 'Latin-1')
+
+
+
+
+selectInput_fun = function(input_id, input_label, input_choices, input_selected){
+  
+  selectInput(inputId = input_id,
+              label = input_label,
+              choices = input_choices, 
+              selected = input_selected)
+}
+
+
+radioButtons_fun = function(input_id, input_label, input_choices, input_selected) {
+  
+  radioButtons(
+        inputId = input_id,
+        label = input_label,
+        choices = input_choices, 
+        selected = input_selected,
+        inline = TRUE,
+        width = '400px')
+}
+
+
+ 
+```
+
+
+
+Reparticiones
+=========================================
+  
+{.sidebar data-width=225}
+-------------------------------------
+
+```{r}
+
+selectInput_fun('reparticion', tags$strong('Reparticion:'), sort(c(unique(data_todos$reparticion))), "Ministerio De Salud")
+
+
+```
+
+
+
+
+*En el <span style="color:red">Pie Chart</span> podemos seleccionar las distintas reparticiones y ver que tipo de gasto tiene cada una de ellas.*
+
+*El gasto se puede ver por participacion sobre el gasto total como porcentaje y también como monto absoluto si se deja el cursor sobre el Pie Chart.*
+
+
+   
+Column {data-width=775} 
+-------------------------------------
+    
+### 
+
+
+```{r}
+ 
+highchartOutput("chart_pie")
+
+```
+
+```{r, context="server"}
+
+get_pie_plot = function(data, reparticion_value, size_title, size_subtitle) {
+  
+    img = paste0("<img src ='", 'https://upload.wikimedia.org/wikipedia/commons/4/49/Etevos' , ".png' width='150' height='120'> <ul><li><b>Reparticion: {point.reparticion}</li></b> <li><b>Monto: {point.y}</b></li> <li><b>Rubro: {point.rubro}</b></li> <li><b>Porcentaje: {point.percentage:.1f} %</b></li> </ul> ")
+
+
+    
+    data %>%
+    dplyr::filter(reparticion == as.character(reparticion_value)) %>%
+    arrange(desc(total)) %>% 
+    highcharter::hchart('pie', hcaes(x = rubro, y = round(total,2)),
+           showInLegend = F,
+           maxSize = "15%",
+           dataLabels = list(enabled = TRUE, format = '{point.name} <br><b>{point.percentage:.1f} %')) %>%
+    highcharter::hc_plotOptions(
+      column = list(borderColor = 'black',
+                    borderRadius = 2)) %>%
+    highcharter::hc_legend(enabled = TRUE) %>%
+    highcharter::hc_tooltip(pointFormat = img,
+                   useHTML = T) %>%
+    highcharter::hc_title(text = paste0('Reparticion: ', as.character(reparticion_value), ' Participacion por tipo de gasto.'),
+       style = list(fontSize = size_title, fontWeight = 'bold')) %>%
+    highcharter::hc_subtitle(text = paste0('Los valores estan expresados en 100.000 (Cien Mil ARS).'),
+                style = list(fontSize = size_subtitle, fontWeight = 'bold')) %>%
+    highcharter::hc_credits(enabled = TRUE,
+               text = "Fuente: Gobierno de la Ciudad",
+               align = "right",
+               verticalAlign = "bottom",
+               style = list(color = "black",
+                     fontSize = '12px'),
+        href = "https://datosgcba.github.io/bac-open-contracting/politica-publicacion/") %>%
+    highcharter::hc_yAxis(labels = list(style = list(color = "black")),
+             tickColor = "black",title = list(text = "Total")) %>%
+    highcharter::hc_xAxis(labels = list(style = list(color = "black")),
+             tickColor = "black") %>% 
+    highcharter::hc_caption(text = "Ministerio de Economia y Finanzas - Buenos-Aires-Compras")
+}
+
+
+output$chart_pie = renderHighchart({
+  
+
+  get_pie_plot(data_todos, input$reparticion,
+               size_title='16px',
+               size_subtitle ='12px')
+})
+
+```
+
+
+
+
+
+Rubros
+=========================================
+  
+{.sidebar data-width=225}
+-------------------------------------
+
+```{r}
+
+
+selectInput_fun('rubro', tags$strong('Rubro'), sort(c(unique(data_todos$rubro))), "Salud")
+
+
+sliderInput(inputId = "slider", 
+            label = tags$strong('Top'),
+                  min = 3, max = 15,
+                  value = 10, step = 1)
+
+
+```
+
+
+
+```{r, context="server"}
+
+
+
+reactColors <- 
+  reactive({
+    switch(input$rubro, 
+           "Alimentacion Y Gastronomia" = '#59d97f', 
+           "Informatica " = '#E7372A',
+           "Salud" = '#22a0bd',
+           "Seguridad " = '#00a650',
+           "Laboratorio Para Analisis Fisico Y/O Quimico E Instrumental De Precision" = '#636b67',
+           "Vehiculos" = '#320d54',
+           "Perfumeria Limpieza Y Contenedores Comerciales E Industriales" = '#c7d92b',
+           "Muebles" = '#a16d1a',
+           "Textil Confeccion Y Calzado " = '#f252c8',
+           "Servicios" = '#b09b5b',
+           "Reservado Para Gcba " = '#a8209d',
+           "Construccion " = '#d265d6',
+           "Cultura Deporte Y Recreacion" = '#907e51',
+           "Artes Graficas Duplicacion Y Equipamiento Para Impresion " = '#1b8aa6',
+           "Equipamiento Para Oficina"  = '#21a3ff',
+           "Maquinas Y Herramientas" = '#1c1f1e',
+           "Promocion Y Publicidad " = '#616966',
+           "Agricultura Ganaderia Y Espacios Verdes" = '#ee7369',
+           "Comunicaciones" = '#7ac6d7',
+           "Electricidad Y Electronica" = '#66c996',
+           "Ferreteria" = '#a1a6a3',
+           "Materia Prima Y/O Semi Elaborada No Metalica" = '#846d98',
+           "Culto" = '#dde87f',
+           stop('Error en reactColors'))
+})
+
+```
+
+
+
+*En el <span style="color:green">Bar Chart</span> podemos seleccionar los distintos Rubros y ver hasta el top 15 de gastos por repartición.*
+
+*Si se deja el cursor sobre el Bar Chart se pueden observar mas datos.*
+
+
+
+
+   
+Column {data-width=775} 
+-------------------------------------
+    
+
+
+### 
+
+```{r}
+
+highchartOutput("chart_column")
+
+```
+
+
+```{r , context="server"}
+
+output$chart_column = renderHighchart({
+  
+  img = paste0("<img src ='", 'https://upload.wikimedia.org/wikipedia/commons/4/49/Etevos' , ".png' width='150' height='120'> <ul><li><b>Reparticion: {point.name}</li></b> <li><b>Monto: {point.y}</b></li></ul> ")
+    
+  data_todos %>%
+      dplyr::filter(rubro == as.character(input$rubro)) %>%
+      arrange(desc(total)) %>% 
+      slice(1:input$slider) %>% 
+      highcharter::hchart('column', hcaes(x = reparticion, y = round(total,2)),
+             showInLegend = F,
+             maxSize = "15%",
+             dataLabels = list(enabled = TRUE, format = '<b>{point.y}</b>')) %>%
+      highcharter::hc_plotOptions(
+        column = list(borderColor = 'black',
+                      borderRadius = 2)) %>%
+      highcharter::hc_legend(enabled = TRUE) %>%
+      highcharter::hc_colors(reactColors()) %>%
+      highcharter::hc_tooltip(pointFormat = img,
+                     useHTML = T) %>%
+      highcharter::hc_title(text = paste0('Top 5 Gastos por reparticion para Rubro: ', as.character(input$rubro)),
+         style = list(fontSize = '18px', fontWeight = 'bold')) %>%
+      highcharter::hc_subtitle(text = paste0('Los valores estan expresados en 100.000 (Cien Mil ARS).'),
+                  style = list(fontSize = '12px', fontWeight = 'bold')) %>%
+      highcharter::hc_credits(enabled = TRUE,
+                 text = "Fuente: Gobierno de la Ciudad",
+                 align = "right",
+                 verticalAlign = "bottom",
+                 style = list(color = "black",
+                       fontSize = '12px'),
+          href = "https://datosgcba.github.io/bac-open-contracting/politica-publicacion/") %>%
+      highcharter::hc_yAxis(labels = list(style = list(color = "black")),
+               tickColor = "black",title = list(text = "Total")) %>%
+      highcharter::hc_xAxis(labels = list(style = list(color = "black")),
+               tickColor = "black",title = list(text = "Reparticion")) %>% 
+      highcharter::hc_caption(text = "Ministerio de Economia y Finanzas - Buenos-Aires-Compras")
+})
+```
+
+
+
+
+
+Top Gastos
+=========================================
+
+
+
+
+Column {data-width=1000} 
+-------------------------------------
+    
+
+
+### 
+
+```{r}
+
+highchartOutput("chart_column_4")
+
+```
+
+
+```{r , context="server"}
+
+output$chart_column_4 = renderHighchart({
+  
+  img = paste0("<img src ='", 'https://upload.wikimedia.org/wikipedia/commons/4/49/Etevos' , ".png' width='150' height='120'> <ul><li><b>Rubro: {point.rubro}</li></b> <li><b>Monto: {point.y}</b></li></ul> ")
+  
+  data_todos %>%
+      arrange(desc(total)) %>% 
+      slice(1:5) %>% 
+      highcharter::hchart('column', hcaes(x = reparticion, y = round(total * 100000,2), group  = rubro),
+             maxSize = "15%") %>%
+      highcharter::hc_plotOptions(
+        column = list(borderColor = 'black',
+                      grouping = FALSE,
+                      borderRadius = 2)) %>%
+      highcharter::hc_legend(floating = TRUE,
+                             layout = 'vertical',
+                             verticalAlign = 'top',
+                             align = 'right') %>%
+      highcharter::hc_tooltip(pointFormat = img,
+                     useHTML = T) %>%
+      highcharter::hc_title(text = paste0('Top 5 gastos totales 2022.'),
+         style = list(fontSize = '18px', fontWeight = 'bold')) %>%
+      highcharter::hc_subtitle(text = paste0('Agrupado por Reparticion y Rubro.'),
+                  style = list(fontSize = '12px', fontWeight = 'bold')) %>%
+      highcharter::hc_credits(enabled = TRUE,
+                 text = "Fuente: Gobierno de la Ciudad",
+                 align = "right",
+                 verticalAlign = "bottom",
+                 style = list(color = "black",
+                       fontSize = '12px'),
+          href = "https://datosgcba.github.io/bac-open-contracting/politica-publicacion/") %>%
+      highcharter::hc_yAxis(labels = list(style = list(color = "black")),
+               tickColor = "black",title = list(text = "Total")) %>%
+      highcharter::hc_xAxis(labels = list(style = list(color = "black")),
+               tickColor = "black") %>% 
+      highcharter::hc_caption(text = "Ministerio de Economia y Finanzas - Buenos-Aires-Compras")
+})
+```
+
+
+
+
+
+
+Proveedores
+=========================================
+  
+{.sidebar data-width=225}
+-------------------------------------
+
+```{r}
+
+
+
+sliderInput(inputId = "sliderdos", 
+            label = tags$strong('Top 40 Proveedores'),
+                  min = 3, max = 40,
+                  value = 12, step = 1)
+
+
+```
+
+
+
+
+*En el <span style="color:green">Bar Chart</span> podemos visualizar como máximo los 40 proveedores con mayor monto operado en el periodo.*
+
+
+
+
+   
+Column {data-width=775} 
+-------------------------------------
+    
+
+
+### 
+
+```{r}
+
+highchartOutput("chart_column_2")
+
+```
+
+
+```{r , context="server"}
+
+output$chart_column_2 = renderHighchart({
+  
+  img = paste0("<img src ='", 'https://upload.wikimedia.org/wikipedia/commons/4/49/Etevos' , ".png' width='150' height='120'> <ul><li><b>Entidad: {point.name}</li></b> <li><b>Monto: {point.y}</b></li></ul> ")
+  
+  data_prov %>%
+      arrange(desc(total)) %>% 
+      slice(1:input$sliderdos) %>% 
+      highcharter::hchart('column', hcaes(x = entidad, y = round(total,2)),
+             showInLegend = F,
+             maxSize = "15%",
+             dataLabels = list(enabled = TRUE, format = '<b>{point.y}</b>')) %>%
+      highcharter::hc_plotOptions(
+        column = list(borderColor = 'black',
+                      borderRadius = 2)) %>%
+      highcharter::hc_legend(enabled = TRUE) %>%
+      highcharter::hc_tooltip(pointFormat = img,
+                     useHTML = T) %>%
+      highcharter::hc_title(text = paste0('Top gastos por Proveedor.'),
+         style = list(fontSize = '18px', fontWeight = 'bold')) %>%
+      highcharter::hc_subtitle(text = paste0('Los valores estan expresados en 100.000 (Cien Mil ARS).'),
+                  style = list(fontSize = '12px', fontWeight = 'bold')) %>%
+      highcharter::hc_credits(enabled = TRUE,
+                 text = "Fuente: Gobierno de la Ciudad",
+                 align = "right",
+                 verticalAlign = "bottom",
+                 style = list(color = "black",
+                       fontSize = '12px'),
+          href = "https://datosgcba.github.io/bac-open-contracting/politica-publicacion/") %>%
+      highcharter::hc_yAxis(labels = list(style = list(color = "black")),
+               tickColor = "black",title = list(text = "Total")) %>%
+      highcharter::hc_xAxis(labels = list(style = list(color = "black")),
+               tickColor = "black",title = list(text = "Entidad")) %>% 
+      highcharter::hc_caption(text = "Ministerio de Economia y Finanzas - Buenos-Aires-Compras")
+})
+```
+
+
+
+
+Tipo de Contratación
+=========================================
+  
+
+
+Column {data-width=1000} 
+-------------------------------------
+    
+
+
+### 
+
+```{r}
+
+highchartOutput("chart_column_3")
+
+```
+
+
+```{r , context="server"}
+
+output$chart_column_3 = renderHighchart({
+  
+  img = paste0("<img src ='", 'https://upload.wikimedia.org/wikipedia/commons/4/49/Etevos' , ".png' width='150' height='120'> <ul><li><b>Contratacion: {point.name}</li></b> <li><b>Monto: {point.y}</b></li></ul> ")
+  
+  data_cont %>%
+      arrange(desc(total)) %>% 
+      highcharter::hchart('column', hcaes(x = tipo, y = round(total * 100000,2)),
+             showInLegend = F,
+             maxSize = "15%",
+             dataLabels = list(enabled = TRUE, format = '<b>{point.name}</b>')) %>%
+      highcharter::hc_plotOptions(
+        column = list(borderColor = 'black',
+                      borderRadius = 2)) %>%
+      highcharter::hc_legend(enabled = TRUE) %>%
+    highcharter::hc_colors(as.character('red')) %>%
+      highcharter::hc_tooltip(pointFormat = img,
+                     useHTML = T) %>%
+      highcharter::hc_title(text = paste0('Top gastos por Tipo de Contratacion.'),
+         style = list(fontSize = '18px', fontWeight = 'bold')) %>%
+      highcharter::hc_credits(enabled = TRUE,
+                 text = "Fuente: Gobierno de la Ciudad",
+                 align = "right",
+                 verticalAlign = "bottom",
+                 style = list(color = "black",
+                       fontSize = '12px'),
+          href = "https://datosgcba.github.io/bac-open-contracting/politica-publicacion/") %>%
+      highcharter::hc_yAxis(labels = list(style = list(color = "black")),
+               tickColor = "black",title = list(text = "Total")) %>%
+      highcharter::hc_xAxis(labels = list(style = list(color = "black")),
+               tickColor = "black") %>% 
+      highcharter::hc_caption(text = "Ministerio de Economia y Finanzas - Buenos-Aires-Compras")
+})
+```
+
+
+
+Ficha Técnica
+=========================================
+
+
+
+
+**Buenos Aires Compras**
+
+
+
+El Gobierno de la Ciudad de Buenos Aires hace <b>disponible</b> el acceso a <b>información</b> sobre las contrataciones públicas que le permite saber cómo se gestionan las mismas.
+La política de datos abiertos del Gobierno de la Ciudad de Buenos Aires nos permite poder realizar análisis de datos sobre los distintos tipos de gastos por repartición.
+
+
+<b>En este tablero podemos observar los siguientes items:</b>
+
+-  Participación del tipo de gasto por repartición.
+-  Top 15 de reparticiones por tipo de gasto.
+-  Top 40 de proveedores por gasto.
+-  Tipo de Contratación por gasto.
+
+
+
+<b>El Dashboard incluye los siguientes gráficos:</b>
+
+-   Pie Chart
+-   Bar Chart
+
+
+<b>Algunos comentarios:</b>
+
+-   El gasto mas alto en compras agrupado por Rubro y Repartición es: Alimentación y Gastronomía para el Ministerio y Educación. El que lo sigue es Informática para la Repartición Agencia Sistemas de Información.
+
+- Casi el 80% del gasto en compras de Jefatura de Gabinete de Ministros es en: Servicios y Vehiculos.
+
+-     
+
+
+**Fuente de Datos**
+
+-   [Gobierno de la Ciudad](https://datosgcba.github.io/bac-open-contracting/politica-publicacion/)
+
+
+
+**Contacto**
+
+-   [Linkedin](https://www.linkedin.com/in/maximilianogaloto)
+
+
+
+
