@@ -12,6 +12,7 @@
 - [**Metodologia**](https://github.com/MGaloto/compras_gob_ciudad#metodologia)
 - [**Estructura**](https://github.com/MGaloto/compras_gob_ciudad#estructura)
 - [**Resultados**](https://github.com/MGaloto/compras_gob_ciudad#resultados)
+- [**Continua**](https://github.com/MGaloto/compras_gob_ciudad#continua)
 
 ### Dashoard Final:
 
@@ -92,13 +93,13 @@ Se utilizaron las siguientes librerias de R y Python para el ETL + el dashboard 
  <a href="#top">Volver al Inicio</a>
 </div>
 
-Se hace lectura de un archivo .csv desde la siguiente pagina: [GCBA](https://datosgcba.github.io/bac-open-contracting/politica-publicacion/) utilizando pandas y [Airflow](https://airflow.apache.org/) para orquestar el flujo de trabajo y automatizar la tarea.
+Se hace lectura de un archivo .csv desde la siguiente página: [GCBA](https://datosgcba.github.io/bac-open-contracting/politica-publicacion/) utilizando pandas y [Airflow](https://airflow.apache.org/) para orquestar el flujo de trabajo y automatizar la tarea.
 
-Hay que tener en cuenta los siguientes items:
+Hay que tener en cuenta los siguientes ítems:
 
-- Los montos en dolares fueron convertidos a pesos Argentinos utilizando el tipo de cambio del contracts/dateSigned (La fecha en que se firmó el contrato). Esto nos permite tener todos los valores expresados en pesos Argentinos.
+- Los montos en dólares fueron convertidos a pesos Argentinos utilizando el tipo de cambio del contracts/dateSigned (La fecha en que se firmó el contrato). Esto nos permite tener todos los valores expresados en pesos Argentinos.
 
-- El tipo de cambio utilizado es el dolar paralelo promedio entre comprador y vendedor informado por ambito.com.
+- El tipo de cambio utilizado es el dólar paralelo promedio entre comprador y vendedor informado por ambito.com.
 
 - Se hizo limpieza del DataFrame inicial y solo se seleccionaron las siguientes columnas:
 
@@ -119,7 +120,6 @@ Hay que tener en cuenta los siguientes items:
 - *parties/name* (Nombre común)
 
 - *tender/procurementMethodDetails* (Detalles del método de contratación)
-
 
 
 
@@ -163,14 +163,13 @@ A continuación se muestra la lista de las carpetas principales del repositorio:
 
 En resumen:
 
-- El archivo `.gitignore` no trackea docuemntos para el repositorio.
-- `bac.Rmd` es el script de R que contiene el codigo para el dashboard.
+- El archivo `.gitignore` no trackea documentos para el repositorio.
+- `bac.Rmd` es el script de R que contiene el código para el dashboard.
 - Con `.docker-compose.yaml` se construye la imagen para ejecutar Airflow.
-- En la carpeta dags se encuentran dos archivos: `etl.py` (Script de Python con el codigo para el ETL) y `my_dag.py` (Script de Python con el codigo para ejecutar con Airflow). 
+- En la carpeta dags se encuentran dos archivos: `etl.py` (Script de Python con el código para el ETL) y `my_dag.py` (Script de Python con el código para ejecutar con Airflow). 
 - En la carpeta `data_csv` se guardan los archivos de extract.
 - En la carpeta `home` se guardan los archivos del load.
-- En la carpeta `images` estan las imagenes y gifs del repositorio.
-
+- En la carpeta `images` están las imágenes y gifs del repositorio.
 
 
 
@@ -181,8 +180,7 @@ En resumen:
  <a href="#top">Volver al Inicio</a>
 </div>
 
-Para observar los montos operados en el periodo por Rubro y Reparticion podemos acceder a las siguientes hojas del dashboard:
-
+Para observar los montos operados en el periodo por Rubro y Repartición podemos acceder a las siguientes hojas del dashboard:
 
 <p align="center">
   <img width="650" height="450" src="images/montos.gif">
@@ -192,17 +190,29 @@ En cada una de ellas podemos visualizar:
 
 - Montos totales operados en el periodo desglosados por rubro y repartición ✅
 
-
 Para observar los montos operados por empresa:
-
 
 <p align="center">
   <img width="650" height="450" src="images/empresas.gif">
 </p>
 
 
-
-Por ultimo, para observar los montos operados por tipo de contratacion tenemos que acceder a la ante ultima hoja del dashboard.
-
+Por último, para observar los montos operados por tipo de contratación tenemos que acceder a la ante ultima hoja del dashboard.
 
 
+## Continua
+
+
+<div style="text-align: right" class="toc-box">
+ <a href="#top">Volver al Inicio</a>
+</div>
+
+
+- El trabajo de ETL + Visualización se puede continuar a futuro teniendo en cuenta los siguientes ítems:
+
+    - Desglosar compras en dólares y pesos según repartición y tipo de gasto.
+    - Utilizar Time Series para ver los cambios de la demanda de gastos a medida que pasa el tiempo.
+    - Automatizar en un servidor la ejecución del DAG utilizando una periodicidad acorde a la actualización de datos del Gobierno.
+    - Usar una Base de Datos en un servicio en la nube para guardar nuevos datos y leerlos desde el Dashboard.
+
+Para las próximas actualizaciones se tendrán en cuenta cada uno de ellos.
